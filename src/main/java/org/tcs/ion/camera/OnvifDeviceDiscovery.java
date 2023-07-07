@@ -16,7 +16,7 @@ public class OnvifDeviceDiscovery {
         manager.setDiscoveryTimeout(timeoutInSeconds * 1000);
     }
 
-    public int discover() {
+    public int discover(boolean authRequire) {
         final Integer[] count = {0};
         manager.discover(new DiscoveryListener() {
             @Override
@@ -29,7 +29,7 @@ public class OnvifDeviceDiscovery {
                 Logger.log("ONVIF DEVICE DISCOVERY ENDED.");
 
                 if (!devices.isEmpty())
-                    new OnvifDeviceEnquiry().inquireByDevice(devices);
+                    new OnvifDeviceEnquiry(authRequire).inquireByDevice(devices);
 
                 synchronized (count[0]) {
                     count[0] = devices.size();

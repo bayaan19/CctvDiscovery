@@ -52,7 +52,7 @@ public class OnvifDevicesData {
         try {
             String fileName = "OnvifDevicesData-" + Logger.currentTimestamp() + ".json";
             new Gson().toJson(data, new FileWriter(fileName));
-            Logger.log("ONVIF DEVICES DATA DUMPED IN FILE: " + fileName);
+            Logger.msg("ONVIF device(s) data dumped in file: " + fileName);
         } catch (IOException e) {
             Logger.log(e);
         }

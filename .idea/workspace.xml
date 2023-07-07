@@ -4,22 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="55d195c8-3626-4968-a517-0af0923cefa5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/Main.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/OnvifDeviceDiscovery.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/OnvifDeviceEnquiry.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/models/OnvifDeviceData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/models/OnvifDevicesData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/models/OnvifMediaProfileData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/util/InetAddress.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/util/Logger.java" afterDir="false" />
+    <list default="true" id="55d195c8-3626-4968-a517-0af0923cefa5" name="Changes" comment="ONVIF Device Discovery - Initial Version.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/util/Input.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/util/Read.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/OnvifDeviceDiscovery.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/OnvifDeviceDiscovery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/OnvifDeviceEnquiry.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/OnvifDeviceEnquiry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/models/OnvifDevicesData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/tcs/ion/camera/models/OnvifDevicesData.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,6 +88,18 @@
       <option name="presentableId" value="Default" />
       <updated>1685673164361</updated>
     </task>
+    <task id="LOCAL-00001" summary="ONVIF Device Discovery - Initial Version.">
+      <created>1686478850588</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1686478850588</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="ONVIF Device Discovery - Initial Version." />
+    <option name="LAST_COMMIT_MESSAGE" value="ONVIF Device Discovery - Initial Version." />
   </component>
 </project>
