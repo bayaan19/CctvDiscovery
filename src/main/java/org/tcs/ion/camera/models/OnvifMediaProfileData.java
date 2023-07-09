@@ -6,9 +6,6 @@ public class OnvifMediaProfileData {
     OnvifMediaProfile mediaProfile;
     String uri;
 
-    public OnvifMediaProfileData() {
-    }
-
     public OnvifMediaProfileData(OnvifMediaProfile mediaProfile) {
         this.mediaProfile = mediaProfile;
     }

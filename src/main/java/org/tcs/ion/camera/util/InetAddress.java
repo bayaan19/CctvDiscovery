@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class InetAddress {
     private InetAddress() {}
 
-    private static InetAddressValidator validator = InetAddressValidator.getInstance();
+    private static final InetAddressValidator validator = InetAddressValidator.getInstance();
 
     public static List<String> getInetAddressesInSubnet() {
         List<String> allAddresses = new ArrayList<>();
