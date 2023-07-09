@@ -24,6 +24,7 @@ public class OnvifDeviceData {
     public List<OnvifMediaProfile> profiles() {
         return mediaProfiles.stream().map(OnvifMediaProfileData::getMediaProfile).collect(Collectors.toList());
     }
+
     public List<OnvifMediaProfileData> getMediaProfiles() {
         return mediaProfiles;
     }
@@ -31,15 +32,16 @@ public class OnvifDeviceData {
     public void setMediaProfiles(List<OnvifMediaProfile> mediaProfiles) {
         this.mediaProfiles.addAll(mediaProfiles.stream().map(OnvifMediaProfileData::new).collect(Collectors.toList()));
     }
+
+    public void setMediaProfiles(OnvifMediaProfile mediaProfile) {
+        this.mediaProfiles.add(new OnvifMediaProfileData(mediaProfile));
+    }
+
     public void setMediaProfiles(OnvifMediaProfile mediaProfile, String uri) {
         mediaProfiles.forEach(item -> {
             if (item.getMediaProfile().equals(mediaProfile))
                 item.setUri(uri);
-         });
-    }
-
-    public void setMediaProfiles(OnvifMediaProfile mediaProfile) {
-        this.mediaProfiles.add(new OnvifMediaProfileData(mediaProfile));
+        });
     }
 
     public OnvifDeviceInformation getDeviceInformation() {

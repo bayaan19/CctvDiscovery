@@ -5,21 +5,22 @@ import be.teletask.onvif.models.OnvifDeviceInformation;
 import be.teletask.onvif.models.OnvifMediaProfile;
 import be.teletask.onvif.models.OnvifServices;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.tcs.ion.camera.util.Logger;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class OnvifDevicesData {
     Map<OnvifDevice, OnvifDeviceData> data = new HashMap<>();
 
     public int getCount() {
         return data.size();
-    }
-
-    public Set<OnvifDevice> getDevices() {
-        return data.keySet();
     }
 
     public List<MediaProfileList> getProfiles() {
@@ -45,13 +46,13 @@ public class OnvifDevicesData {
     }
 
     public String getAsJson() {
-        return new Gson().toJson(data);
+        return new Gson().toJson(data.values());
     }
 
     public void dumpAsJson() {
-        try {
-            String fileName = "OnvifDevicesData-" + Logger.currentTimestamp() + ".json";
-            new Gson().toJson(data, new FileWriter(fileName));
+        String fileName = "OnvifDevicesData-" + Logger.currentTimestamp() + ".json";
+        try (Writer writer = new FileWriter(fileName)) {
+            new GsonBuilder().create().toJson(data.values(), writer);
             Logger.msg("ONVIF device(s) data dumped in file: " + fileName);
         } catch (IOException e) {
             Logger.log(e);

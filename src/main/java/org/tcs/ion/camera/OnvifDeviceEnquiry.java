@@ -1,11 +1,7 @@
 package org.tcs.ion.camera;
 
 import be.teletask.onvif.OnvifManager;
-import be.teletask.onvif.listeners.OnvifResponseListener;
-import be.teletask.onvif.models.Device;
 import be.teletask.onvif.models.OnvifDevice;
-import be.teletask.onvif.models.OnvifMediaProfile;
-import be.teletask.onvif.responses.OnvifResponse;
 import org.tcs.ion.camera.models.OnvifDevicesData;
 import org.tcs.ion.camera.util.Input;
 import org.tcs.ion.camera.util.Logger;
@@ -13,49 +9,142 @@ import org.tcs.ion.camera.util.Read;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class OnvifDeviceEnquiry implements OnvifResponseListener {
+public class OnvifDeviceEnquiry {
     private final boolean authRequire;
-    OnvifManager onvifManager;
+    int awaitTimeoutInMinute = 1;
     OnvifDevicesData data;
     private Input.UserPass authDetails;
-    private CountDownLatch latch;
 
     public OnvifDeviceEnquiry(boolean authRequire) {
-        this.onvifManager = new OnvifManager(this);
         this.data = new OnvifDevicesData();
         this.authRequire = authRequire;
         if (authRequire)
             this.authDetails = Input.getUserPass();
     }
 
-    @Override
-    public void onResponse(OnvifDevice onvifDevice, OnvifResponse onvifResponse) {
-        Logger.log(onvifDevice.getHostName() + " " + onvifResponse.getOnvifRequest().getType().name() + " " + onvifResponse.isSuccess());
-        latch.countDown();
+    private void getServicesInfo(List<OnvifDevice> onvifDevices) throws InterruptedException {
+        int noOfDevices = onvifDevices.size();
+        CountDownLatch latch = new CountDownLatch(noOfDevices);
+        OnvifManager onvifManager = new OnvifManager(new OnvifResponseListenerImpl(latch));
+
+        Logger.log("GETTING SERVICE INFORMATION FROM " + noOfDevices + " DEVICES.");
+        onvifDevices.forEach(onvifDevice -> {
+            try {
+                Logger.log("Request -- " + onvifDevice.getHostName());
+                onvifManager.getServices(onvifDevice, (device, services) -> {
+                    Logger.log("Success  -- " + onvifDevice.getHostName() + " -- " + services.getServicesPath());
+                    data.put(device, services);
+                    latch.countDown();
+                });
+            } catch (Exception e) {
+                Logger.log("Failed  -- " + onvifDevice.getHostName() + " -- " + e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        if (latch.await(awaitTimeoutInMinute, TimeUnit.MINUTES))
+            Logger.log("GETTING SERVICE INFORMATION FOR " + noOfDevices + " DEVICES ENDED.");
+        else
+            Logger.log("GETTING SERVICE INFORMATION FOR " + noOfDevices + " DEVICES TIMED OUT.");
     }
 
-    @Override
-    public void onError(OnvifDevice onvifDevice, int errorCode, String errorMessage) {
-        Logger.log(onvifDevice.getHostName() + " " + errorCode + " " + errorMessage);
-        latch.countDown();
+    private void getDeviceInformation(List<OnvifDevice> onvifDevices) throws InterruptedException {
+        int noOfDevices = onvifDevices.size();
+        CountDownLatch latch = new CountDownLatch(noOfDevices);
+        OnvifManager onvifManager = new OnvifManager(new OnvifResponseListenerImpl(latch));
+
+        Logger.log("GETTING DEVICE INFORMATION FOR " + noOfDevices + " DEVICES.");
+        onvifDevices.forEach(onvifDevice -> {
+            try {
+                Logger.log("Request -- " + onvifDevice.getHostName());
+                onvifManager.getDeviceInformation(onvifDevice, (device, deviceInformation) -> {
+                    Logger.log("Success  -- " + onvifDevice.getHostName() + " -- " + deviceInformation.getHardwareId());
+                    data.put(device, deviceInformation);
+                    latch.countDown();
+                });
+            } catch (Exception e) {
+                Logger.log("Failed  -- " + onvifDevice.getHostName() + " -- " + e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        if (latch.await(awaitTimeoutInMinute, TimeUnit.MINUTES))
+            Logger.log("GETTING DEVICE INFORMATION FOR " + noOfDevices + " DEVICES ENDED.");
+        else
+            Logger.log("GETTING DEVICE INFORMATION FOR " + noOfDevices + " DEVICES TIMED OUT.");
+
     }
 
-    private void getDeviceInformation(OnvifDevice onvifDevice) {
-        onvifManager.getDeviceInformation(onvifDevice, (device, deviceInformation) -> data.put(device, deviceInformation));
+    private void getMediaProfiles(List<OnvifDevice> onvifDevices) throws InterruptedException {
+        int noOfDevices = onvifDevices.size();
+        CountDownLatch latch = new CountDownLatch(noOfDevices);
+        OnvifManager onvifManager = new OnvifManager(new OnvifResponseListenerImpl(latch));
+
+        Logger.log("GETTING MEDIA PROFILE INFORMATION FOR " + noOfDevices + " DEVICES.");
+        onvifDevices.forEach(onvifDevice -> {
+            try {
+                Logger.log("Request -- " + onvifDevice.getHostName());
+                onvifManager.getMediaProfiles(onvifDevice, (device, mediaProfiles) -> {
+                    Logger.log("Success  -- " + onvifDevice.getHostName() + " -- " + mediaProfiles.size());
+                    data.put(device, mediaProfiles);
+                    latch.countDown();
+                });
+            } catch (Exception e) {
+                Logger.log("Failed  -- " + onvifDevice.getHostName() + " -- " + e.getMessage());
+                latch.countDown();
+            }
+        });
+
+        if (latch.await(awaitTimeoutInMinute, TimeUnit.MINUTES))
+            Logger.log("GETTING MEDIA PROFILE INFORMATION FOR " + noOfDevices + " DEVICES ENDED.");
+        else
+            Logger.log("GETTING MEDIA PROFILE INFORMATION FOR " + noOfDevices + " DEVICES TIMED OUT.");
     }
 
-    private void getServicesInfo(OnvifDevice onvifDevice) {
-        onvifManager.getServices(onvifDevice, (device, services) -> data.put(device, services));
+    private void getMediaStreamURI(List<OnvifDevicesData.MediaProfileList> profiles) throws InterruptedException {
+        int noOfProfiles = profiles.size();
+
+        if (noOfProfiles > 0) {
+            CountDownLatch latch = new CountDownLatch(noOfProfiles);
+            OnvifManager onvifManager = new OnvifManager(new OnvifResponseListenerImpl(latch));
+
+            Logger.log("GETTING MEDIA STREAM URI INFORMATION FOR " + noOfProfiles + " PROFILES.");
+            profiles.forEach(profile -> {
+                try {
+                    Logger.log("Request -- " + profile.onvifDevice.getHostName() + " -- " + profile.mediaProfile.getName());
+                    onvifManager.getMediaStreamURI(profile.onvifDevice, profile.mediaProfile, (device, mediaProfile, uri) -> {
+                        Logger.log("Success  -- " + profile.onvifDevice.getHostName() + " -- " + profile.mediaProfile.getName() + " -- " + uri);
+                        data.put(device, mediaProfile, uri);
+                        latch.countDown();
+                    });
+                } catch (Exception e) {
+                    Logger.log("Failed   -- " + profile.onvifDevice.getHostName() + " -- " + profile.mediaProfile.getName() + " -- " + e.getMessage());
+                    latch.countDown();
+                }
+            });
+
+            if (latch.await(awaitTimeoutInMinute, TimeUnit.MINUTES))
+                Logger.log("GETTING MEDIA STREAM URI INFORMATION FOR " + noOfProfiles + " DEVICES ENDED.");
+            else
+                Logger.log("GETTING MEDIA STREAM URI INFORMATION FOR " + noOfProfiles + " DEVICES TIMED OUT.");
+        }
     }
 
-    private void getMediaProfiles(OnvifDevice onvifDevice) {
-        onvifManager.getMediaProfiles(onvifDevice, (device, mediaProfiles) -> data.put(device, mediaProfiles));
-    }
+    public int inquire(List<OnvifDevice> onvifDevices) {
+        try {
+            getServicesInfo(onvifDevices);
+            getDeviceInformation(onvifDevices);
+            getMediaProfiles(onvifDevices);
+            getMediaStreamURI(data.getProfiles());
+        } catch (Exception e) {
+            Logger.log(e);
+        }
 
-    private void getMediaStreamURI(OnvifDevice onvifDevice, OnvifMediaProfile onvifMediaProfile) {
-        onvifManager.getMediaStreamURI(onvifDevice, onvifMediaProfile, (device, mediaProfile, uri) -> data.put(device, mediaProfile, uri));
+        data.dumpAsJson();
+        return data.getCount();
     }
 
     public int inquireByHostname(List<String> hostNames) {
@@ -63,47 +152,6 @@ public class OnvifDeviceEnquiry implements OnvifResponseListener {
             return inquire(hostNames.stream().map(h -> new OnvifDevice(h, authDetails.username, authDetails.password)).collect(Collectors.toList()));
         else
             return inquire(hostNames.stream().map(OnvifDevice::new).collect(Collectors.toList()));
-    }
-
-    public int inquireByDevice(List<Device> devices) {
-        if (authRequire)
-            return inquire(devices.stream().map(s -> new OnvifDevice(s.getHostName(), authDetails.username, authDetails.password)).collect(Collectors.toList()));
-        else
-            return inquire(devices.stream().map(s -> new OnvifDevice(s.getHostName())).collect(Collectors.toList()));
-    }
-
-    public int inquire(List<OnvifDevice> onvifDevices) {
-        try {
-            int noOfDevices = onvifDevices.size();
-            latch = new CountDownLatch(noOfDevices);
-            Logger.log("GETTING SERVICE INFORMATION FROM " + noOfDevices + " DEVICES.");
-            onvifDevices.forEach(this::getServicesInfo);
-            latch.await();
-
-            latch = new CountDownLatch(noOfDevices);
-            Logger.log("GETTING DEVICE INFORMATION FOR " + noOfDevices + " DEVICES.");
-            onvifDevices.forEach(this::getDeviceInformation);
-            latch.await();
-
-            latch = new CountDownLatch(noOfDevices);
-            Logger.log("GETTING PROFILE INFORMATION FOR " + noOfDevices + " DEVICES.");
-            onvifDevices.forEach(this::getMediaProfiles);
-            latch.await();
-
-            List<OnvifDevicesData.MediaProfileList> profiles = data.getProfiles();
-            int noOfProfiles = profiles.size();
-            if (noOfProfiles > 0) {
-                latch = new CountDownLatch(noOfProfiles);
-                Logger.log("GETTING MEDIA STREAM URI INFORMATION FOR " + noOfProfiles + " PROFILES.");
-                profiles.forEach(item -> getMediaStreamURI(item.onvifDevice, item.mediaProfile));
-                latch.await();
-            }
-
-            data.dumpAsJson();
-        } catch (Exception e) {
-            Logger.log(e);
-        }
-        return data.getCount();
     }
 
     public int inquireByFile(String file) {

@@ -5,10 +5,12 @@ import be.teletask.onvif.listeners.DiscoveryListener;
 import be.teletask.onvif.models.Device;
 import org.tcs.ion.camera.util.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OnvifDeviceDiscovery {
-    int timeoutInSeconds = 3;
+    int timeoutInSeconds = 60;
     DiscoveryManager manager;
 
     public OnvifDeviceDiscovery() {
@@ -16,8 +18,9 @@ public class OnvifDeviceDiscovery {
         manager.setDiscoveryTimeout(timeoutInSeconds * 1000);
     }
 
-    public int discover(boolean authRequire) {
-        final Integer[] count = {0};
+    public List<String> discover() {
+        final List<String>[] hostnames = new List[]{new ArrayList<>()};
+
         manager.discover(new DiscoveryListener() {
             @Override
             public void onDiscoveryStarted() {
@@ -28,24 +31,30 @@ public class OnvifDeviceDiscovery {
             public void onDevicesFound(List<Device> devices) {
                 Logger.log("ONVIF DEVICE DISCOVERY ENDED.");
 
-                if (!devices.isEmpty())
-                    new OnvifDeviceEnquiry(authRequire).inquireByDevice(devices);
-
-                synchronized (count[0]) {
-                    count[0] = devices.size();
-                    count[0].notify();
+                synchronized (hostnames[0]) {
+                    if (!devices.isEmpty())
+                        hostnames[0].addAll(devices.stream().map(Device::getHostName).collect(Collectors.toList()));
+                    hostnames[0].notify();
                 }
             }
         });
 
         try {
             Logger.log("ONVIF DEVICE DISCOVERY WAITING.");
-            synchronized (count[0]) {
-                count[0].wait();
+            synchronized (hostnames[0]) {
+                hostnames[0].wait();
             }
         } catch (InterruptedException e) {
             Logger.log(e);
         }
-        return count[0];
+
+        int count = hostnames[0].size();
+        if (count > 0) {
+            Logger.msg(count + " ONVIF device(s) discovered using WS-Discovery.");
+        } else {
+            Logger.msg("ONVIF device discovery unsuccessful using WS-Discovery.");
+        }
+
+        return hostnames[0];
     }
 }
